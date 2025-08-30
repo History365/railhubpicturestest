@@ -73,14 +73,17 @@
             border-bottom: 1px solid #eee;
             margin-bottom: 2rem;
             flex-wrap: wrap;
+            gap: 0.5rem;
         }
         
         .profile-tab {
-            padding: 1rem 1.5rem;
+            padding: 0.8rem 1.2rem;
             cursor: pointer;
             font-weight: 500;
             border-bottom: 2px solid transparent;
             transition: all 0.2s ease;
+            border-radius: 4px 4px 0 0;
+            position: relative;
         }
         
         .profile-tab:hover {
@@ -91,6 +94,19 @@
         .profile-tab.active {
             border-bottom: 2px solid #444;
             color: #444;
+            background-color: #f5f5f5;
+        }
+        
+        .profile-tab:last-child {
+            margin-left: auto;
+            background-color: #f0f0f0;
+            color: #555;
+            border: none;
+            border-radius: 4px;
+        }
+        
+        .profile-tab:last-child:hover {
+            background-color: #e5e5e5;
         }
         
         .tab-content {
@@ -197,6 +213,86 @@
             font-size: 1.1em;
         }
         
+        /* Comments section styling */
+        .comments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .comment-item {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 1.2rem;
+            border-left: 4px solid #ddd;
+            transition: transform 0.2s ease, border-left-color 0.2s ease;
+        }
+        
+        .comment-item:hover {
+            transform: translateX(3px);
+            border-left-color: #444;
+        }
+        
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.8rem;
+        }
+        
+        .comment-meta {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .comment-date {
+            margin-right: 1rem;
+            font-weight: 500;
+        }
+        
+        .comment-post a {
+            color: #444;
+            font-weight: 500;
+            text-decoration: none;
+        }
+        
+        .comment-post a:hover {
+            text-decoration: underline;
+        }
+        
+        .comment-content {
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .page-button {
+            padding: 0.5em 1em;
+            background: #f5f5f5;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #444;
+            font-weight: 500;
+        }
+        
+        .page-button:hover {
+            background: #eee;
+        }
+        
+        .page-indicator {
+            color: #666;
+        }
+
         @media (max-width: 768px) {
             .profile-main {
                 flex-direction: column;
@@ -214,6 +310,11 @@
             
             .profile-tabs {
                 justify-content: center;
+            }
+            
+            .comment-header {
+                flex-direction: column;
+                gap: 0.5rem;
             }
         }
 
@@ -415,7 +516,7 @@
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <nav style="display: flex; gap: 2.5rem;">
                     <a href="index.html" style="color: #444; text-decoration: none; font-weight: 500; font-size: 0.95em;">Home</a>
-                    <a href="newestphotos.html" style="color: #444; text-decoration: none; font-weight: 500; font-size: 0.95em;">Latest Photos</a>
+                    <a href="newestphotos.html" style="color: #444; text-decoration: none; font-weight: 500; font-size: 0.95em;">Newest Photos</a>
                     <a href="contribPicks.html" style="color: #444; text-decoration: none; font-weight: 500; font-size: 0.95em;">Contributor Picks</a>
                     <a href="railroadList.html" style="color: #444; text-decoration: none; font-weight: 500; font-size: 0.95em;">Railroads</a>
                 </nav>
@@ -456,7 +557,8 @@
                 <div class="profile-tabs">
                     <div class="profile-tab active" onclick="changeTab('uploads')">My Uploads</div>
                     <div class="profile-tab" onclick="changeTab('favorites')">Favorites</div>
-                    <div class="profile-tab" onclick="changeTab('settings')">Settings</div>
+                    <div class="profile-tab" onclick="changeTab('comments')">My Comments</div>
+                    <div class="profile-tab" onclick="Clerk.openUserProfile()">Settings</div>
                 </div>
                 
                 <div id="uploads-tab" class="tab-content active">
@@ -478,10 +580,54 @@
                     </div>
                 </div>
                 
-                <div id="settings-tab" class="tab-content">
-                    <div class="no-content">
-                        <h3>Account Settings</h3>
-                        <p>Manage your account settings using the Clerk user button above.</p>
+                <div id="comments-tab" class="tab-content">
+                    <div id="user-comments">
+                        <h3 style="margin-bottom: 1.5rem;">My Comments</h3>
+                        
+                        <!-- Sample comments - these would be dynamically loaded -->
+                        <div class="comments-list">
+                            <div class="comment-item">
+                                <div class="comment-header">
+                                    <div class="comment-meta">
+                                        <span class="comment-date">August 28, 2025</span>
+                                        <span class="comment-post">on <a href="photo.html?id=12345">UP 8937 at Cajon Pass</a></span>
+                                    </div>
+                                </div>
+                                <div class="comment-content">
+                                    <p>Great shot of that SD70ACe! The lighting is perfect and really shows off the details of the locomotive. I was there last week but didn't get nearly as good conditions.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="comment-item">
+                                <div class="comment-header">
+                                    <div class="comment-meta">
+                                        <span class="comment-date">August 15, 2025</span>
+                                        <span class="comment-post">on <a href="photo.html?id=12289">BNSF 7628 Grain Train</a></span>
+                                    </div>
+                                </div>
+                                <div class="comment-content">
+                                    <p>Nice composition with the mountains in the background. Do you know what model locomotive was trailing?</p>
+                                </div>
+                            </div>
+                            
+                            <div class="comment-item">
+                                <div class="comment-header">
+                                    <div class="comment-meta">
+                                        <span class="comment-date">July 22, 2025</span>
+                                        <span class="comment-post">on <a href="photo.html?id=11982">CSX Heritage Unit</a></span>
+                                    </div>
+                                </div>
+                                <div class="comment-content">
+                                    <p>Wow, that's a rare catch! I've been hoping to see one of these heritage units for months. Great photo!</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="pagination">
+                            <button class="page-button">Previous</button>
+                            <span class="page-indicator">Page 1 of 1</span>
+                            <button class="page-button">Next</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -582,6 +728,12 @@
         
         // Function to change tabs
         function changeTab(tabName) {
+            // If this is the settings tab, open Clerk settings directly
+            if (tabName === 'settings') {
+                Clerk.openUserProfile();
+                return;
+            }
+            
             // Hide all tab contents
             const tabContents = document.querySelectorAll('.tab-content');
             tabContents.forEach(tab => tab.classList.remove('active'));
@@ -595,6 +747,13 @@
             
             // Highlight the clicked tab
             event.currentTarget.classList.add('active');
+            
+            // If this is the comments tab, load comments data
+            if (tabName === 'comments') {
+                // In a real application, you would load comments from an API here
+                console.log('Loading comments data...');
+                // loadUserComments(); // Function to implement in the future
+            }
         }
     </script>
 </body>
