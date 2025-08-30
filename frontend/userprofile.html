@@ -691,11 +691,15 @@
                             <img src="${user.imageUrl || 'assets/images/default-avatar.png'}" alt="Profile" class="profile-picture">
                             <div class="profile-info">
                                 <h2>${user.firstName || ''} ${user.lastName || ''}</h2>
-                                <p class="username">@${user.username || user.id}</p>
+                                <p class="username">@${user.username || user.firstName?.toLowerCase() || 'user'}</p>
                                 <div class="profile-details">
                                     <p><strong>Member since:</strong> ${new Date(user.createdAt).toLocaleDateString()}</p>
                                     <p><strong>Email:</strong> ${user.emailAddresses?.[0]?.emailAddress || 'No email provided'}</p>
                                     <p><strong>Uploads:</strong> <span id="upload-count">0</span> photos</p>
+                                    <details style="margin-top: 10px; color: #777; font-size: 0.9em;">
+                                        <summary style="cursor: pointer; font-weight: 500;">Account ID</summary>
+                                        <p style="margin-top: 5px; padding: 8px; background: #f5f5f5; border-radius: 4px; font-family: monospace; word-break: break-all;">${user.id}</p>
+                                    </details>
                                 </div>
                                 <div class="user-action-buttons">
                                     <button onclick="editProfile()">Edit Profile</button>

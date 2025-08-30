@@ -6,11 +6,16 @@ window.addEventListener("load", async () => {
     
     // Get the auth buttons container
     const authButtonsContainer = document.getElementById("auth-buttons");
+    const userInfo = document.getElementById("userInfo");
     
     if (Clerk.user) {
+      // Check if user is the owner
+      const isOwner = Clerk.user.id === "user_2NXvOtm8D4Rjmc8F8Wm0T0OI2uX"; // Replace with your actual owner ID
+      
       // User is logged in
       authButtonsContainer.innerHTML = `
         <div style="display: flex; align-items: center; gap: 1rem;">
+          ${isOwner ? '<span style="background: #444; color: #fff; font-size: 0.8em; padding: 0.2em 0.6em; border-radius: 4px; font-weight: 500;">Owner</span>' : ''}
           <div id="user-button"></div>
           <button onclick="Clerk.signOut()" style="color: #444; text-decoration: none; font-weight: 500; padding: 0.7em 1.4em; border-radius: 6px; background: #f5f5f5; font-size: 0.95em; border: 1px solid #eee; cursor: pointer;">Log Out</button>
         </div>
@@ -36,7 +41,20 @@ window.addEventListener("load", async () => {
         });
       }
       
+      // Log user info and update userInfo element if it exists
       console.log("User is signed in:", Clerk.user.firstName);
+      
+      // If userInfo element exists, display name and role
+      if (userInfo) {
+        const isOwner = Clerk.user.id === "user_2NXvOtm8D4Rjmc8F8Wm0T0OI2uX"; // Replace with your actual owner ID
+        const displayName = Clerk.user.username || Clerk.user.firstName;
+        
+        if (isOwner) {
+          userInfo.innerHTML = `Welcome, ${displayName} <span style="background: #444; color: #fff; font-size: 0.8em; padding: 0.2em 0.6em; border-radius: 4px; font-weight: 500; margin-left: 0.5em;">Owner</span>`;
+        } else {
+          userInfo.innerHTML = `Welcome, ${displayName}`;
+        }
+      }
     } else {
       // User is not logged in
       authButtonsContainer.innerHTML = `
