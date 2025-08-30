@@ -308,22 +308,27 @@
                         <div id="locomotives-container">
                             <div class="locomotive-entry" data-index="0">
                                 <div class="locomotive-search">
-                                    <div class="form-group">
-                                        <label class="form-label">Railroad</label>
-                                        <input type="text" name="locomotives[0][railroad]" class="form-input railroad-input" placeholder="Railroad company name (e.g., UP, BNSF, CSX)" autocomplete="off">
-                                        <div class="railroad-suggestions" style="display: none;"></div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Model</label>
-                                        <input type="text" name="locomotives[0][model]" class="form-input model-input" placeholder="Locomotive model (e.g., SD70MAC, ES44AC)">
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Number</label>
-                                        <input type="text" name="locomotives[0][number]" class="form-input number-input" placeholder="Unit number">
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Primary Unit?</label>
-                                        <input type="radio" name="primary_unit" value="0" checked>
+                                    <div class="locomotive-grid">
+                                        <div class="form-group">
+                                            <label class="form-label">Railroad</label>
+                                            <input type="text" name="locomotives[0][railroad]" class="form-input railroad-input" placeholder="Railroad company name (e.g., UP, BNSF, CSX)" autocomplete="off">
+                                            <div class="railroad-suggestions" style="display: none;"></div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Model</label>
+                                            <input type="text" name="locomotives[0][model]" class="form-input model-input" placeholder="Locomotive model (e.g., SD70MAC, ES44AC)">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Number</label>
+                                            <input type="text" name="locomotives[0][number]" class="form-input number-input" placeholder="Unit number">
+                                        </div>
+                                        <div class="form-group primary-unit-group">
+                                            <label class="form-label">Primary Unit?</label>
+                                            <div class="radio-container">
+                                                <input type="radio" id="primary_0" name="primary_unit" value="0" checked>
+                                                <label for="primary_0" class="radio-label"></label>
+                                            </div>
+                                        </div>
                                     </div>
                                     <input type="hidden" name="locomotives[0][unit_id]" class="unit-id-input" value="new">
                                 </div>
@@ -360,37 +365,103 @@
                     
                     <style>
                         .locomotive-entry {
-                            border: 1px solid #ddd;
-                            padding: 1rem;
-                            margin-bottom: 1rem;
-                            border-radius: 4px;
+                            border: 1px solid #e0e0e0;
+                            padding: 1.5rem;
+                            margin-bottom: 1.5rem;
+                            border-radius: 8px;
                             position: relative;
+                            background-color: #fff;
+                            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                            transition: box-shadow 0.2s ease;
                         }
+                        
+                        .locomotive-entry:hover {
+                            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+                        }
+                        
+                        .locomotive-search {
+                            width: 100%;
+                        }
+                        
+                        .locomotive-grid {
+                            display: grid;
+                            grid-template-columns: 1fr 1fr 0.8fr 0.5fr;
+                            gap: 1rem;
+                        }
+                        
+                        @media (max-width: 768px) {
+                            .locomotive-grid {
+                                grid-template-columns: 1fr 1fr;
+                            }
+                        }
+                        
+                        @media (max-width: 480px) {
+                            .locomotive-grid {
+                                grid-template-columns: 1fr;
+                            }
+                        }
+                        
+                        .primary-unit-group {
+                            display: flex;
+                            flex-direction: column;
+                        }
+                        
+                        .radio-container {
+                            display: flex;
+                            align-items: center;
+                            height: 100%;
+                            padding-top: 8px;
+                        }
+                        
+                        .radio-label {
+                            margin-left: 8px;
+                            cursor: pointer;
+                        }
+                        
                         .add-locomotive-btn {
-                            background: none;
-                            border: 1px dashed #999;
-                            padding: 0.5rem 1rem;
-                            color: #666;
+                            background: #f5f5f5;
+                            border: 1px dashed #aaa;
+                            padding: 0.8rem 1rem;
+                            color: #444;
                             cursor: pointer;
                             width: 100%;
-                            margin-top: 0.5rem;
-                            border-radius: 4px;
+                            margin-top: 0.75rem;
+                            border-radius: 8px;
+                            font-weight: 500;
+                            transition: all 0.2s ease;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 0.5rem;
                         }
+                        
                         .add-locomotive-btn:hover {
-                            background: #f5f5f5;
+                            background: #eee;
+                            border-color: #888;
                         }
+                        
                         .remove-locomotive {
                             position: absolute;
-                            top: 0.5rem;
-                            right: 0.5rem;
-                            background: none;
-                            border: none;
-                            color: #999;
-                            cursor: pointer;
-                            font-size: 1.2rem;
-                        }
-                        .remove-locomotive:hover {
+                            top: 0.75rem;
+                            right: 0.75rem;
+                            background: rgba(255,255,255,0.8);
+                            border: 1px solid #e0e0e0;
                             color: #666;
+                            cursor: pointer;
+                            font-size: 1rem;
+                            width: 28px;
+                            height: 28px;
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            transition: all 0.2s ease;
+                        }
+                        
+                        .remove-locomotive:hover {
+                            background: #f5f5f5;
+                            color: #444;
+                            border-color: #ccc;
                         }
                     </style>
 
@@ -410,6 +481,15 @@
                                         input.name = input.name.replace('[0]', `[${locoCount}]`);
                                         input.value = '';
                                     }
+                                    
+                                    // Update radio button ID
+                                    if (input.type === 'radio') {
+                                        input.id = `primary_${locoCount}`;
+                                        const label = input.nextElementSibling;
+                                        if (label && label.tagName === 'LABEL') {
+                                            label.setAttribute('for', `primary_${locoCount}`);
+                                        }
+                                    }
                                 });
 
                                 // Set up radio button
@@ -419,7 +499,7 @@
 
                                 // Show remove button for additional entries
                                 const removeBtn = template.querySelector('.remove-locomotive');
-                                removeBtn.style.display = 'block';
+                                removeBtn.style.display = 'flex';
                                 removeBtn.addEventListener('click', function() {
                                     template.remove();
                                 });
@@ -709,7 +789,7 @@
         }
 
         .locomotive-confirmation {
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.6);
             position: fixed;
             top: 0;
             left: 0;
@@ -719,55 +799,77 @@
             align-items: center;
             justify-content: center;
             z-index: 1000;
+            backdrop-filter: blur(3px);
         }
 
         .confirmation-content {
             background: white;
-            padding: 2rem;
-            border-radius: 8px;
+            padding: 2.5rem;
+            border-radius: 12px;
             width: 90%;
             max-width: 500px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            animation: modalFadeIn 0.3s ease-out;
+        }
+        
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .confirmation-content h3 {
-            font-size: 1.2rem;
+            font-size: 1.4rem;
             margin-bottom: 1rem;
             color: #333;
+            font-weight: 600;
         }
 
         .confirmation-details {
             background: #f8f8f8;
-            padding: 1rem;
-            border-radius: 6px;
-            margin: 1rem 0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            border: 1px solid #e0e0e0;
         }
 
         .detail-row {
             display: flex;
-            margin-bottom: 0.5rem;
-            font-size: 0.95rem;
+            margin-bottom: 0.8rem;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        
+        .detail-row:last-child {
+            margin-bottom: 0;
         }
 
         .detail-label {
-            font-weight: 500;
+            font-weight: 600;
             width: 100px;
-            color: #666;
+            color: #555;
         }
 
         .detail-value {
             color: #333;
+            font-weight: 500;
         }
 
         .confirmation-actions {
             display: flex;
             gap: 1rem;
-            margin-top: 1.5rem;
+            margin-top: 1.8rem;
+            justify-content: flex-end;
         }
 
         .btn-confirm, .btn-edit {
-            padding: 0.7em 1.2em;
-            border-radius: 6px;
+            padding: 0.8em 1.5em;
+            border-radius: 8px;
             font-size: 0.95em;
             cursor: pointer;
             font-family: 'Inter', sans-serif;
@@ -779,10 +881,13 @@
         .btn-confirm {
             background: #444;
             color: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
         .btn-confirm:hover {
             background: #333;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
         }
 
         .btn-edit {
@@ -793,25 +898,31 @@
 
         .btn-edit:hover {
             background: #eee;
+            transform: translateY(-1px);
         }
 
         .railroad-suggestions {
             position: absolute;
             background: white;
             border: 1px solid #e0e0e0;
-            border-radius: 6px;
+            border-radius: 8px;
             margin-top: 4px;
             width: 100%;
-            max-height: 200px;
+            max-height: 220px;
             overflow-y: auto;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             z-index: 100;
         }
 
         .suggestion-item {
-            padding: 0.7em 1em;
+            padding: 0.8em 1.2em;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.2s;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .suggestion-item:last-child {
+            border-bottom: none;
         }
 
         .suggestion-item:hover {
