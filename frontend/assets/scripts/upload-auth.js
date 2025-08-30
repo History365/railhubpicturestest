@@ -43,6 +43,22 @@ window.addEventListener("load", async () => {
       // Make sure the form is visible
       if (uploadFormContainer) {
         uploadFormContainer.style.display = 'block';
+        
+        // Set all username fields to the logged-in user's username or email
+        const usernameFields = document.querySelectorAll('input[name="username"]');
+        
+        // Use username if available, otherwise use first part of email
+        // We're using the properties directly from Clerk.user which preserves capitalization
+        const username = Clerk.user.username || 
+                         Clerk.user.primaryEmailAddress?.emailAddress?.split('@')[0] || 
+                         `${Clerk.user.firstName || ''}${Clerk.user.lastName || ''}`.trim() ||
+                         Clerk.user.id;
+        
+        usernameFields.forEach(field => {
+          field.value = username;
+          field.readOnly = true; // Make it read-only since it's from the account
+          field.style.backgroundColor = '#f5f5f5';
+        });
       }
       
       // Update section title to include user name

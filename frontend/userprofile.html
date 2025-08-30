@@ -30,18 +30,191 @@
             color: #333;
             background-color: #f8f8f8;
         }
-
-        .hero {
-            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('images/CSC_0371.JPG');
-            background-size: cover;
-            background-position: center;
-            height: 500px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            color: #fff;
+        
+        /* Profile Section Styles */
+        .profile-section {
+            padding: 4rem 0 2rem;
             margin-top: 120px;
+        }
+        
+        .profile-header {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        
+        .profile-content {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 2rem;
+        }
+        
+        .profile-picture {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            border: 3px solid #fff;
+        }
+        
+        .profile-details {
+            margin-bottom: 1.5rem;
+            color: #666;
+            line-height: 1.7;
+        }
+        
+        .profile-tabs {
+            display: flex;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .profile-tab {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+        
+        .profile-tab:hover {
+            color: #444;
+            background-color: #f9f9f9;
+        }
+        
+        .profile-tab.active {
+            border-bottom: 2px solid #444;
+            color: #444;
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .photo-item {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .photo-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+        
+        .photo-item img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+        }
+        
+        .no-content {
+            text-align: center;
+            padding: 3rem 0;
+            color: #888;
+            background: #f9f9f9;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        
+        .user-action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .user-action-buttons button {
+            background: #f5f5f5;
+            border: 1px solid #eee;
+            padding: 0.7em 1.4em;
+            border-radius: 6px;
+            font-weight: 500;
+            color: #444;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .user-action-buttons button:hover {
+            background: #eee;
+        }
+        
+        .user-button-container {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #eee;
+        }
+        
+        /* Additional Profile Styling */
+        .profile-overview {
+            width: 100%;
+        }
+        
+        .profile-main {
+            display: flex;
+            gap: 2rem;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+        
+        .profile-info {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .profile-info h2 {
+            font-size: 1.8em;
+            margin-bottom: 0.2rem;
+            color: #333;
+        }
+        
+        .username {
+            color: #666;
+            margin: 0.5rem 0 1rem;
+            font-size: 1.1em;
+        }
+        
+        @media (max-width: 768px) {
+            .profile-main {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            
+            .profile-picture {
+                margin: 0 auto 1.5rem;
+            }
+            
+            .user-action-buttons {
+                justify-content: center;
+            }
+            
+            .profile-tabs {
+                justify-content: center;
+            }
         }
 
         .hero-content {
@@ -101,7 +274,7 @@
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 0 2rem;
         }
@@ -344,8 +517,8 @@
                                     width: '100%'
                                 },
                                 avatarBox: {
-                                    width: '60px',
-                                    height: '60px'
+                                    width: '32px',
+                                    height: '32px'
                                 }
                             }
                         }
@@ -368,17 +541,21 @@
                 const user = Clerk.user;
                 
                 profileContent.innerHTML = `
-                    <div style="display: flex; gap: 2rem; align-items: center;">
-                        <img src="${user.imageUrl || 'assets/images/default-avatar.png'}" alt="Profile" class="profile-picture">
-                        <div>
-                            <h2>${user.firstName || ''} ${user.lastName || ''}</h2>
-                            <p style="color: #666; margin: 0.5rem 0;">@${user.username || user.id}</p>
-                            <div class="profile-details">
-                                <p>Member since: ${new Date(user.createdAt).toLocaleDateString()}</p>
-                                <p>Email: ${user.emailAddresses?.[0]?.emailAddress || 'No email provided'}</p>
-                            </div>
-                            <div class="user-action-buttons">
-                                <button onclick="editProfile()" style="color: #444; text-decoration: none; font-weight: 500; padding: 0.5em 1em; border-radius: 6px; background: #f5f5f5; font-size: 0.9em; border: 1px solid #eee; cursor: pointer;">Edit Profile</button>
+                    <div class="profile-overview">
+                        <div class="profile-main">
+                            <img src="${user.imageUrl || 'assets/images/default-avatar.png'}" alt="Profile" class="profile-picture">
+                            <div class="profile-info">
+                                <h2>${user.firstName || ''} ${user.lastName || ''}</h2>
+                                <p class="username">@${user.username || user.id}</p>
+                                <div class="profile-details">
+                                    <p><strong>Member since:</strong> ${new Date(user.createdAt).toLocaleDateString()}</p>
+                                    <p><strong>Email:</strong> ${user.emailAddresses?.[0]?.emailAddress || 'No email provided'}</p>
+                                    <p><strong>Uploads:</strong> <span id="upload-count">0</span> photos</p>
+                                </div>
+                                <div class="user-action-buttons">
+                                    <button onclick="editProfile()">Edit Profile</button>
+                                    <button onclick="window.location.href='upload.html'">Upload Photo</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -389,9 +566,9 @@
                     <div class="no-content">
                         <h2>Not Logged In</h2>
                         <p>Please log in to view your profile.</p>
-                        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1rem;">
-                            <button onclick="Clerk.openSignIn()" style="color: #444; text-decoration: none; font-weight: 500; padding: 0.7em 1.4em; border-radius: 6px; background: #f5f5f5; font-size: 0.95em; border: 1px solid #eee; cursor: pointer;">Log In</button>
-                            <button onclick="Clerk.openSignUp()" style="color: #fff; text-decoration: none; font-weight: 500; padding: 0.7em 1.4em; border-radius: 6px; background: #444; font-size: 0.95em; cursor: pointer;">Register</button>
+                        <div class="user-action-buttons" style="justify-content: center; margin-top: 1.5rem;">
+                            <button onclick="Clerk.openSignIn()">Log In</button>
+                            <button onclick="Clerk.openSignUp()" style="background: #444; color: #fff;">Register</button>
                         </div>
                     </div>
                 `;
