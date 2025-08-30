@@ -33,13 +33,21 @@
 
         main {
             flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
             margin-top: 120px;
+            padding: 2rem 0;
         }
 
         .container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
         }
 
         .error-container {
@@ -48,12 +56,18 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 4rem 1rem;
-            margin: 2rem auto;
+            padding: 4rem 2rem;
             background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             max-width: 700px;
+            width: 100%;
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .error-code {
@@ -165,7 +179,7 @@
                 <div class="error-code">404</div>
                 <h1 class="error-title">Page Not Found</h1>
                 <p class="error-message">The page you're looking for doesn't exist or may have been moved. Let's get you back on track.</p>
-                <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1rem;">
+                <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem; flex-wrap: wrap;">
                     <a href="index.html" class="cta-button">Back to Home</a>
                     <a href="search.html" class="cta-button" style="background: rgba(68, 68, 68, 0.15); color: #444;">Search Photos</a>
                 </div>
@@ -174,7 +188,7 @@
     </main>
 
     <footer style="background: #f8f8f8; border-top: 1px solid #eee; padding: 3rem 0; margin-top: auto;">
-        <div class="container">
+        <div class="container" style="display: block;">
             <div style="text-align: center; color: #888; font-size: 0.9rem; padding-top: 2rem;">
                 <p>Railhub Pictures © 2024-2025 • All Photos © Respective Authors • <a href="aboutme.html" style="color: #666; text-decoration: none;">About</a></p>
             </div>
