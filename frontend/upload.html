@@ -17,6 +17,7 @@
       type="text/javascript">
     </script>
     <script src="assets/scripts/clerk-auth.js"></script>
+    <script src="assets/scripts/upload-auth.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -305,37 +306,41 @@
 
                     <div class="form-group">
                         <label class="form-label">Locomotives in Photo</label>
-                        <div id="locomotives-container">
-                            <div class="locomotive-entry" data-index="0">
-                                <div class="locomotive-search">
-                                    <div class="locomotive-grid">
-                                        <div class="form-group">
-                                            <label class="form-label">Railroad</label>
-                                            <input type="text" name="locomotives[0][railroad]" class="form-input railroad-input" placeholder="Railroad company name (e.g., UP, BNSF, CSX)" autocomplete="off">
-                                            <div class="railroad-suggestions" style="display: none;"></div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="form-label">Model</label>
-                                            <input type="text" name="locomotives[0][model]" class="form-input model-input" placeholder="Locomotive model (e.g., SD70MAC, ES44AC)">
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="form-label">Number</label>
-                                            <input type="text" name="locomotives[0][number]" class="form-input number-input" placeholder="Unit number">
-                                        </div>
-                                        <div class="form-group primary-unit-group">
-                                            <label class="form-label">Primary Unit?</label>
-                                            <div class="radio-container">
-                                                <input type="radio" id="primary_0" name="primary_unit" value="0" checked>
-                                                <label for="primary_0" class="radio-label"></label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <input type="hidden" name="locomotives[0][unit_id]" class="unit-id-input" value="new">
-                                </div>
-                                <button type="button" class="remove-locomotive" style="display: none;">&times; Remove</button>
+                        
+                        <!-- Locomotive tags bar -->
+                        <div class="locomotive-tags-container">
+                            <div id="locomotive-tags" class="locomotive-tags">
+                                <!-- Locomotive tags will be displayed here -->
+                                <div class="empty-tag-message">No locomotives added yet</div>
                             </div>
                         </div>
-                        <button type="button" id="add-locomotive" class="add-locomotive-btn">+ Add Another Locomotive</button>
+                        
+                        <!-- Locomotive input form -->
+                        <div id="locomotive-form" class="locomotive-form">
+                            <div class="locomotive-grid">
+                                <div class="form-group">
+                                    <label class="form-label">Railroad</label>
+                                    <input type="text" id="current-railroad" class="form-input railroad-input" placeholder="Railroad company name (e.g., UP, BNSF, CSX)" autocomplete="off">
+                                    <div class="railroad-suggestions" style="display: none;"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Model</label>
+                                    <input type="text" id="current-model" class="form-input model-input" placeholder="Locomotive model (e.g., SD70MAC, ES44AC)">
+                                </div>
+                                <div class="form-group number-group">
+                                    <label class="form-label">Number</label>
+                                    <div class="number-with-button">
+                                        <input type="text" id="current-number" class="form-input number-input" placeholder="Unit number">
+                                        <button type="button" id="add-locomotive" class="add-locomotive-btn">Add</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Hidden container for the actual form data -->
+                        <div id="locomotives-container" style="display: none;">
+                            <!-- This will be populated with hidden inputs by JavaScript -->
+                        </div>
                     </div>
                     
                     <div id="locomotive-confirmation" class="locomotive-confirmation" style="display: none;">
@@ -364,34 +369,23 @@
                     </div>
                     
                     <style>
-                        .locomotive-entry {
-                            border: 1px solid #e0e0e0;
-                            padding: 1.5rem;
-                            margin-bottom: 1.5rem;
-                            border-radius: 8px;
-                            position: relative;
-                            background-color: #fff;
-                            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-                            transition: box-shadow 0.2s ease;
-                        }
-                        
-                        .locomotive-entry:hover {
-                            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-                        }
-                        
-                        .locomotive-search {
-                            width: 100%;
-                        }
-                        
                         .locomotive-grid {
                             display: grid;
-                            grid-template-columns: 1fr 1fr 0.8fr 0.5fr;
+                            grid-template-columns: 1fr 1fr 1fr;
                             gap: 1rem;
+                            background: #fff;
+                            padding: 1.5rem;
+                            border-radius: 8px;
+                            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                            margin-bottom: 1rem;
                         }
                         
                         @media (max-width: 768px) {
                             .locomotive-grid {
                                 grid-template-columns: 1fr 1fr;
+                            }
+                            .number-group {
+                                grid-column: span 2;
                             }
                         }
                         
@@ -399,69 +393,104 @@
                             .locomotive-grid {
                                 grid-template-columns: 1fr;
                             }
+                            .number-group {
+                                grid-column: span 1;
+                            }
                         }
                         
-                        .primary-unit-group {
+                        .number-with-button {
                             display: flex;
-                            flex-direction: column;
-                        }
-                        
-                        .radio-container {
-                            display: flex;
-                            align-items: center;
-                            height: 100%;
-                            padding-top: 8px;
-                        }
-                        
-                        .radio-label {
-                            margin-left: 8px;
-                            cursor: pointer;
-                        }
-                        
-                        .add-locomotive-btn {
-                            background: #f5f5f5;
-                            border: 1px dashed #aaa;
-                            padding: 0.8rem 1rem;
-                            color: #444;
-                            cursor: pointer;
-                            width: 100%;
-                            margin-top: 0.75rem;
-                            border-radius: 8px;
-                            font-weight: 500;
-                            transition: all 0.2s ease;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
                             gap: 0.5rem;
                         }
                         
-                        .add-locomotive-btn:hover {
-                            background: #eee;
-                            border-color: #888;
+                        .add-locomotive-btn {
+                            background: #444;
+                            color: #fff;
+                            border: none;
+                            padding: 0.7em 1.2em;
+                            border-radius: 6px;
+                            font-weight: 500;
+                            cursor: pointer;
+                            transition: all 0.2s ease;
+                            white-space: nowrap;
                         }
                         
-                        .remove-locomotive {
-                            position: absolute;
-                            top: 0.75rem;
-                            right: 0.75rem;
-                            background: rgba(255,255,255,0.8);
+                        .add-locomotive-btn:hover {
+                            background: #333;
+                        }
+                        
+                        .locomotive-tags-container {
+                            position: relative;
+                            margin-bottom: 1rem;
+                        }
+                        
+                        .locomotive-tags {
+                            display: flex;
+                            flex-wrap: wrap;
+                            gap: 0.5rem;
+                            min-height: 40px;
+                            padding: 0.5rem;
                             border: 1px solid #e0e0e0;
-                            color: #666;
+                            border-radius: 8px;
+                            background: #f9f9f9;
+                        }
+                        
+                        .empty-tag-message {
+                            color: #999;
+                            font-style: italic;
+                            padding: 0.5rem;
+                        }
+                        
+                        .locomotive-tag {
+                            display: flex;
+                            align-items: center;
+                            background: #444;
+                            color: #fff;
+                            padding: 0.4rem 0.8rem;
+                            border-radius: 20px;
+                            font-size: 0.9rem;
+                            gap: 0.5rem;
+                            animation: tagAppear 0.3s ease-out;
+                        }
+                        
+                        @keyframes tagAppear {
+                            from {
+                                opacity: 0;
+                                transform: translateY(5px);
+                            }
+                            to {
+                                opacity: 1;
+                                transform: translateY(0);
+                            }
+                        }
+                        
+                        .remove-tag {
+                            background: none;
+                            border: none;
+                            color: #fff;
                             cursor: pointer;
-                            font-size: 1rem;
-                            width: 28px;
-                            height: 28px;
+                            width: 18px;
+                            height: 18px;
                             border-radius: 50%;
                             display: flex;
                             align-items: center;
                             justify-content: center;
+                            font-size: 0.9rem;
+                            padding: 0;
+                            margin-left: 0.3rem;
                             transition: all 0.2s ease;
                         }
                         
-                        .remove-locomotive:hover {
-                            background: #f5f5f5;
-                            color: #444;
-                            border-color: #ccc;
+                        .remove-tag:hover {
+                            background: rgba(255, 255, 255, 0.2);
+                        }
+                        
+                        .railroad-color-tag {
+                            width: 10px;
+                            height: 10px;
+                            border-radius: 50%;
+                            display: inline-block;
+                            margin-right: 4px;
                         }
                     </style>
 
@@ -469,43 +498,125 @@
                         document.addEventListener('DOMContentLoaded', function() {
                             const container = document.getElementById('locomotives-container');
                             const addBtn = document.getElementById('add-locomotive');
-                            let locoCount = 1;
-
-                            addBtn.addEventListener('click', function() {
-                                const template = document.querySelector('.locomotive-entry').cloneNode(true);
-                                template.setAttribute('data-index', locoCount);
-                                
-                                // Update field names with new index
-                                template.querySelectorAll('input').forEach(input => {
-                                    if (input.name) {
-                                        input.name = input.name.replace('[0]', `[${locoCount}]`);
-                                        input.value = '';
+                            const tagsContainer = document.getElementById('locomotive-tags');
+                            const railroadInput = document.getElementById('current-railroad');
+                            const modelInput = document.getElementById('current-model');
+                            const numberInput = document.getElementById('current-number');
+                            let locoCount = 0;
+                            let railroadColors = {};
+                            
+                            // Function to generate a color based on railroad name
+                            function getColorForRailroad(railroad) {
+                                if (!railroadColors[railroad]) {
+                                    // Generate a hash from the railroad name
+                                    let hash = 0;
+                                    for (let i = 0; i < railroad.length; i++) {
+                                        hash = railroad.charCodeAt(i) + ((hash << 5) - hash);
                                     }
                                     
-                                    // Update radio button ID
-                                    if (input.type === 'radio') {
-                                        input.id = `primary_${locoCount}`;
-                                        const label = input.nextElementSibling;
-                                        if (label && label.tagName === 'LABEL') {
-                                            label.setAttribute('for', `primary_${locoCount}`);
-                                        }
+                                    // Convert hash to a color
+                                    const h = Math.abs(hash) % 360;
+                                    railroadColors[railroad] = `hsl(${h}, 65%, 40%)`;
+                                }
+                                return railroadColors[railroad];
+                            }
+                            
+                            // Function to add a locomotive
+                            function addLocomotive() {
+                                const railroad = railroadInput.value.trim();
+                                const model = modelInput.value.trim();
+                                const number = numberInput.value.trim();
+                                
+                                if (!railroad || !model || !number) {
+                                    alert("Please fill in all locomotive fields");
+                                    return;
+                                }
+                                
+                                // Create hidden inputs for form submission
+                                const railroadField = document.createElement('input');
+                                railroadField.type = 'hidden';
+                                railroadField.name = `locomotives[${locoCount}][railroad]`;
+                                railroadField.value = railroad;
+                                
+                                const modelField = document.createElement('input');
+                                modelField.type = 'hidden';
+                                modelField.name = `locomotives[${locoCount}][model]`;
+                                modelField.value = model;
+                                
+                                const numberField = document.createElement('input');
+                                numberField.type = 'hidden';
+                                numberField.name = `locomotives[${locoCount}][number]`;
+                                numberField.value = number;
+                                
+                                const unitIdField = document.createElement('input');
+                                unitIdField.type = 'hidden';
+                                unitIdField.name = `locomotives[${locoCount}][unit_id]`;
+                                unitIdField.value = 'new';
+                                
+                                container.appendChild(railroadField);
+                                container.appendChild(modelField);
+                                container.appendChild(numberField);
+                                container.appendChild(unitIdField);
+                                
+                                // Remove empty message if present
+                                const emptyMessage = tagsContainer.querySelector('.empty-tag-message');
+                                if (emptyMessage) {
+                                    emptyMessage.remove();
+                                }
+                                
+                                // Create locomotive tag
+                                const tag = document.createElement('div');
+                                tag.className = 'locomotive-tag';
+                                tag.dataset.index = locoCount;
+                                
+                                const color = getColorForRailroad(railroad);
+                                tag.style.background = color;
+                                
+                                tag.innerHTML = `
+                                    <span class="tag-text">${railroad} ${model} #${number}</span>
+                                    <button type="button" class="remove-tag" data-index="${locoCount}">&times;</button>
+                                `;
+                                
+                                tagsContainer.appendChild(tag);
+                                
+                                // Add event listener to remove button
+                                tag.querySelector('.remove-tag').addEventListener('click', function() {
+                                    const index = this.dataset.index;
+                                    
+                                    // Remove hidden inputs
+                                    const inputs = container.querySelectorAll(`input[name*="[${index}]"]`);
+                                    inputs.forEach(input => input.remove());
+                                    
+                                    // Remove tag
+                                    tag.remove();
+                                    
+                                    // If no tags left, show empty message
+                                    if (tagsContainer.childElementCount === 0) {
+                                        const emptyMessage = document.createElement('div');
+                                        emptyMessage.className = 'empty-tag-message';
+                                        emptyMessage.textContent = 'No locomotives added yet';
+                                        tagsContainer.appendChild(emptyMessage);
                                     }
                                 });
-
-                                // Set up radio button
-                                const radio = template.querySelector('input[type="radio"]');
-                                radio.value = locoCount;
-                                radio.checked = false;
-
-                                // Show remove button for additional entries
-                                const removeBtn = template.querySelector('.remove-locomotive');
-                                removeBtn.style.display = 'flex';
-                                removeBtn.addEventListener('click', function() {
-                                    template.remove();
-                                });
-
-                                container.appendChild(template);
+                                
+                                // Clear inputs for next locomotive
+                                railroadInput.value = '';
+                                modelInput.value = '';
+                                numberInput.value = '';
+                                railroadInput.focus();
+                                
                                 locoCount++;
+                            }
+                            
+                            // Add button click event
+                            addBtn.addEventListener('click', addLocomotive);
+                            
+                            // Also allow Enter key in the number field to add a locomotive
+                            numberInput.addEventListener('keypress', function(e) {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    addLocomotive();
+                                }
                             });
                         });
                     </script>
@@ -559,7 +670,17 @@
     </footer>
 
     <script>
-        let existingUnits = <%- JSON.stringify(units) %>;
+        // Using an empty array as fallback if units is not defined by the server
+        let existingUnits = [];
+        try {
+            // This will only work on the server-side rendered page
+            if (typeof units !== 'undefined') {
+                existingUnits = units;
+            }
+        } catch(e) {
+            console.log("Units not defined, using empty array");
+        }
+        
         let debounceTimer;
         let currentRailroad = '';
         let isConfirmed = false;
@@ -567,8 +688,8 @@
         // Function to check if locomotive exists
         function checkLocomotiveExists(railroad, model, number) {
             return existingUnits.find(u => 
-                u.railroad.toLowerCase() === railroad.toLowerCase() &&
-                u.number === number
+                u?.railroad?.toLowerCase() === railroad?.toLowerCase() &&
+                u?.number === number
             );
         }
 
