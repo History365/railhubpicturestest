@@ -10,9 +10,31 @@ window.addEventListener("load", async () => {
     if (Clerk.user) {
       // User is logged in
       authButtonsContainer.innerHTML = `
-        <span style="color: #444; padding: 0.7em 0; font-size: 0.95em;">Welcome ${Clerk.user.firstName || "Railfan"}!</span>
-        <button onclick="Clerk.signOut()" style="color: #444; text-decoration: none; font-weight: 500; padding: 0.7em 1.4em; border-radius: 6px; background: #f5f5f5; font-size: 0.95em; border: 1px solid #eee; cursor: pointer;">Log Out</button>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <div id="user-button"></div>
+          <button onclick="Clerk.signOut()" style="color: #444; text-decoration: none; font-weight: 500; padding: 0.7em 1.4em; border-radius: 6px; background: #f5f5f5; font-size: 0.95em; border: 1px solid #eee; cursor: pointer;">Log Out</button>
+        </div>
       `;
+      
+      // Mount the user button
+      const userButtonElement = document.getElementById("user-button");
+      if (userButtonElement) {
+        Clerk.mountUserButton(userButtonElement, {
+          userProfileMode: 'navigation',
+          userProfileUrl: '/userprofile.html',
+          appearance: {
+            elements: {
+              rootBox: {
+                boxShadow: 'none'
+              },
+              avatarBox: {
+                width: '32px',
+                height: '32px'
+              }
+            }
+          }
+        });
+      }
       
       console.log("User is signed in:", Clerk.user.firstName);
     } else {
