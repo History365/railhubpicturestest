@@ -291,27 +291,6 @@
         .page-indicator {
             color: #666;
         }
-        
-        /* Profile editing styles */
-        #profile-editor input:focus {
-            outline: none;
-            border-color: #444;
-            box-shadow: 0 0 0 2px rgba(68, 68, 68, 0.1);
-        }
-        
-        #profile-editor button:hover {
-            opacity: 0.9;
-        }
-        
-        #profile-editor button:active {
-            transform: translateY(1px);
-        }
-        
-        #profile-update-message {
-            padding: 0.8rem;
-            border-radius: 4px;
-            background-color: #f5f5f5;
-        }
 
         @media (max-width: 768px) {
             .profile-main {
@@ -568,8 +547,9 @@
                         <p>If you're not logged in, please log in to view your profile.</p>
                     </div>
                 </div>
-                <div class="user-button-container">
+                <div class="user-button-container" style="display: flex; align-items: center; gap: 1rem;">
                     <div id="user-button"></div>
+                    <button onclick="Clerk.signOut()" style="color: #444; font-weight: 500; padding: 0.7em 1.4em; border-radius: 6px; background: #f5f5f5; font-size: 0.95em; border: 1px solid #eee; cursor: pointer; white-space: nowrap;">Log Out</button>
                 </div>
             </div>
             
@@ -578,7 +558,6 @@
                     <div class="profile-tab active" onclick="changeTab('uploads')">My Uploads</div>
                     <div class="profile-tab" onclick="changeTab('favorites')">Favorites</div>
                     <div class="profile-tab" onclick="changeTab('comments')">My Comments</div>
-                    <div class="profile-tab" onclick="changeTab('edit-profile')">Edit Profile</div>
                     <div class="profile-tab" onclick="Clerk.openUserProfile()">Settings</div>
                 </div>
                 
@@ -651,39 +630,6 @@
                         </div>
                     </div>
                 </div>
-                
-                <div id="edit-profile-tab" class="tab-content">
-                    <div id="profile-editor">
-                        <h3 style="margin-bottom: 1.5rem;">Edit Your Profile</h3>
-                        
-                        <div style="max-width: 500px; margin: 0 auto;">
-                            <div style="margin-bottom: 1.5rem;">
-                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #444;">First Name</label>
-                                <input type="text" id="edit-first-name" style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;" placeholder="Enter your first name">
-                            </div>
-                            
-                            <div style="margin-bottom: 1.5rem;">
-                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #444;">Last Name</label>
-                                <input type="text" id="edit-last-name" style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;" placeholder="Enter your last name">
-                            </div>
-                            
-                            <div style="margin-bottom: 1.5rem;">
-                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #444;">Username</label>
-                                <div style="position: relative;">
-                                    <span style="position: absolute; left: 0.8rem; top: 0.8rem; color: #888;">@</span>
-                                    <input type="text" id="edit-username" style="width: 100%; padding: 0.8rem; padding-left: 1.8rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;" placeholder="Choose a username">
-                                </div>
-                                <p style="margin-top: 0.5rem; font-size: 0.85rem; color: #888;">Your username will be visible to other users.</p>
-                            </div>
-                            
-                            <div style="margin-top: 2rem;">
-                                <button id="save-profile-btn" onclick="saveProfileChanges()" style="background: #444; color: #fff; border: none; padding: 0.8rem 1.5rem; border-radius: 6px; font-size: 1rem; font-weight: 500; cursor: pointer;">Save Changes</button>
-                                <button onclick="cancelProfileChanges()" style="background: #f5f5f5; border: 1px solid #ddd; color: #444; padding: 0.8rem 1.5rem; border-radius: 6px; font-size: 1rem; font-weight: 500; margin-left: 1rem; cursor: pointer;">Cancel</button>
-                                <p id="profile-update-message" style="margin-top: 1rem; font-weight: 500; display: none;"></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </section>
@@ -740,6 +686,9 @@
                 // User is logged in - show profile
                 const user = Clerk.user;
                 
+                // Check if user is the owner
+                const isOwner = user.id === "user_321PdlXuM1MAAu1uTGsNHiw8B4X";
+                
                 // Calculate display username
                 const displayUsername = user.username || user.firstName?.toLowerCase() || 'user';
                 
@@ -749,7 +698,10 @@
                             <img src="${user.imageUrl || 'assets/images/default-avatar.png'}" alt="Profile" class="profile-picture">
                             <div class="profile-info">
                                 <h2>${user.firstName || ''} ${user.lastName || ''}</h2>
-                                <p class="username">@${displayUsername}</p>
+                                <p class="username">
+                                    @${displayUsername}
+                                    ${isOwner ? '<span style="background: #444; color: #fff; font-size: 0.75em; padding: 0.2em 0.6em; border-radius: 4px; font-weight: 500; margin-left: 0.3em; vertical-align: middle;">Owner</span>' : ''}
+                                </p>
                                 <div class="profile-details">
                                     <p><strong>Member since:</strong> ${new Date(user.createdAt).toLocaleDateString()}</p>
                                     <p><strong>Email:</strong> ${user.emailAddresses?.[0]?.emailAddress || 'No email provided'}</p>
@@ -784,82 +736,7 @@
         
         // Function to edit profile
         function editProfile() {
-            // Switch to edit profile tab
-            changeTab('edit-profile');
-            
-            // Initialize form fields with current values
-            const user = Clerk.user;
-            document.getElementById('edit-first-name').value = user.firstName || '';
-            document.getElementById('edit-last-name').value = user.lastName || '';
-            document.getElementById('edit-username').value = user.username || '';
-        }
-        
-        // Function to save profile changes
-        async function saveProfileChanges() {
-            try {
-                const firstName = document.getElementById('edit-first-name').value.trim();
-                const lastName = document.getElementById('edit-last-name').value.trim();
-                const username = document.getElementById('edit-username').value.trim();
-                const messageEl = document.getElementById('profile-update-message');
-                const saveBtn = document.getElementById('save-profile-btn');
-                
-                // Basic validation
-                if (!firstName) {
-                    showUpdateMessage('First name is required', 'error');
-                    return;
-                }
-                
-                if (username && (username.length < 3 || username.includes(' '))) {
-                    showUpdateMessage('Username must be at least 3 characters and contain no spaces', 'error');
-                    return;
-                }
-                
-                // Show loading state
-                saveBtn.disabled = true;
-                saveBtn.textContent = 'Saving...';
-                
-                // Update the user's profile
-                await Clerk.user.update({
-                    firstName: firstName,
-                    lastName: lastName,
-                    username: username
-                });
-                
-                // Show success message
-                showUpdateMessage('Profile updated successfully!', 'success');
-                
-                // Reload the user profile after a short delay
-                setTimeout(() => {
-                    loadUserProfile();
-                    // Switch back to uploads tab
-                    changeTab('uploads');
-                }, 1500);
-                
-            } catch (error) {
-                console.error('Error updating profile:', error);
-                showUpdateMessage(`Error: ${error.message || 'Failed to update profile'}`, 'error');
-                document.getElementById('save-profile-btn').disabled = false;
-                document.getElementById('save-profile-btn').textContent = 'Save Changes';
-            }
-        }
-        
-        // Function to show update messages
-        function showUpdateMessage(message, type) {
-            const messageEl = document.getElementById('profile-update-message');
-            messageEl.textContent = message;
-            messageEl.style.display = 'block';
-            messageEl.style.color = type === 'error' ? '#d32f2f' : '#388e3c';
-            
-            // Hide message after a few seconds
-            setTimeout(() => {
-                messageEl.style.display = 'none';
-            }, 5000);
-        }
-        
-        // Function to cancel profile changes
-        function cancelProfileChanges() {
-            // Switch back to uploads tab
-            changeTab('uploads');
+            Clerk.openUserProfile();
         }
         
         // Function to change tabs
@@ -868,16 +745,6 @@
             if (tabName === 'settings') {
                 Clerk.openUserProfile();
                 return;
-            }
-            
-            // If this is the edit-profile tab, populate the form fields
-            if (tabName === 'edit-profile') {
-                // Initialize form with current values (if not already initialized)
-                if (Clerk.user && (!document.getElementById('edit-first-name').value)) {
-                    document.getElementById('edit-first-name').value = Clerk.user.firstName || '';
-                    document.getElementById('edit-last-name').value = Clerk.user.lastName || '';
-                    document.getElementById('edit-username').value = Clerk.user.username || '';
-                }
             }
             
             // Hide all tab contents
