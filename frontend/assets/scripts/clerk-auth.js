@@ -16,7 +16,7 @@ window.addEventListener("load", async () => {
       authButtonsContainer.innerHTML = `
         <div style="display: flex; align-items: center; gap: 1rem;">
           <div id="user-button"></div>
-          <button onclick="Clerk.signOut()" style="color: #444; text-decoration: none; font-weight: 500; padding: 0.7em 1.4em; border-radius: 6px; background: #f5f5f5; font-size: 0.95em; border: 1px solid #eee; cursor: pointer;">Log Out</button>
+          <button onclick="Clerk.signOut()" style="color: #444; text-decoration: none; font-weight: 500; padding: 0.7em 1.4em; border-radius: 6px; background: #f5f5f5; font-size: 0.95em; border: 1px solid #eee; cursor: pointer; white-space: nowrap;">Log Out</button>
         </div>
       `;
       
@@ -29,7 +29,8 @@ window.addEventListener("load", async () => {
           appearance: {
             elements: {
               rootBox: {
-                boxShadow: 'none'
+                boxShadow: 'none',
+                width: 'auto'
               },
               avatarBox: {
                 width: '32px',
