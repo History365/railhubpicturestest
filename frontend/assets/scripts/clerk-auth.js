@@ -10,7 +10,7 @@ window.addEventListener("load", async () => {
     
     if (Clerk.user) {
       // Check if user is the owner
-      const isOwner = Clerk.user.id === "user_2NXvOtm8D4Rjmc8F8Wm0T0OI2uX"; // Replace with your actual owner ID
+      const isOwner = Clerk.user.id === "user_321PdlXuM1MAAu1uTGsNHiw8B4X"; // Replace with your actual owner ID
       
       // User is logged in
       authButtonsContainer.innerHTML = `
