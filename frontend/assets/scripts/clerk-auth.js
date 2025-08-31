@@ -44,16 +44,9 @@ window.addEventListener("load", async () => {
       // Log user info and update userInfo element if it exists
       console.log("User is signed in:", Clerk.user.firstName);
       
-      // If userInfo element exists, display name and role
+      // Don't display welcome message to reduce clutter
       if (userInfo) {
-        const isOwner = Clerk.user.id === "user_321PdlXuM1MAAu1uTGsNHiw8B4X"; // Owner ID
-        const displayName = Clerk.user.username || Clerk.user.firstName || "User";
-        
-        if (isOwner) {
-          userInfo.innerHTML = `Welcome, ${displayName} <span style="background: #444; color: #fff; font-size: 0.8em; padding: 0.2em 0.6em; border-radius: 4px; font-weight: 500; margin-left: 0.3em; vertical-align: middle;">Owner</span>`;
-        } else {
-          userInfo.innerHTML = `Welcome, ${displayName}`;
-        }
+        userInfo.innerHTML = ``;
       }
     } else {
       // User is not logged in
