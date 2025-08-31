@@ -1,4 +1,12 @@
 // Clerk Authentication Handler
+
+// Function to confirm before signing out
+function confirmSignOut() {
+  if (confirm("Are you sure you want to sign out?")) {
+    Clerk.signOut();
+  }
+}
+
 window.addEventListener("load", async () => {
   try {
     // Wait for Clerk to load
@@ -16,7 +24,7 @@ window.addEventListener("load", async () => {
       authButtonsContainer.innerHTML = `
         <div style="display: flex; align-items: center; gap: 1rem;">
           <div id="user-button"></div>
-          <button onclick="Clerk.signOut()" style="color: #444; text-decoration: none; font-weight: 500; padding: 0.7em 1.4em; border-radius: 6px; background: #f5f5f5; font-size: 0.95em; border: 1px solid #eee; cursor: pointer; white-space: nowrap;">Log Out</button>
+          <button onclick="confirmSignOut()" style="color: #444; text-decoration: none; font-weight: 500; padding: 0.7em 1.4em; border-radius: 6px; background: #f5f5f5; font-size: 0.95em; border: 1px solid #eee; cursor: pointer; white-space: nowrap;">Log Out</button>
         </div>
       `;
       
