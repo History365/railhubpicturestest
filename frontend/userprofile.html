@@ -551,20 +551,22 @@
                 
                 <div id="uploads-tab" class="tab-content active">
                     <div class="photo-grid" id="user-uploads">
-                        <div class="no-content">
-                            <h3>No uploads yet</h3>
-                            <p>Photos you upload will appear here.</p>
-                            <p><a href="upload.html" style="color: #444; text-decoration: underline;">Upload your first photo</a></p>
-                        </div>
+                        <!-- This will be replaced with actual uploads if any exist -->
+                    </div>
+                    <div class="no-content" id="no-uploads-message" style="text-align: center; padding: 3rem 0; color: #888; background: #f9f9f9; border-radius: 8px; margin: 1rem 0;">
+                        <h3>No uploads yet</h3>
+                        <p style="margin: 1rem 0;">Photos you upload will appear here.</p>
+                        <p><a href="upload.html" style="color: #444; text-decoration: none; display: inline-block; padding: 0.7em 1.4em; background: #f5f5f5; border: 1px solid #eee; border-radius: 6px; font-weight: 500; transition: all 0.2s ease;">Upload your first photo</a></p>
                     </div>
                 </div>
                 
                 <div id="favorites-tab" class="tab-content">
                     <div class="photo-grid" id="user-favorites">
-                        <div class="no-content">
-                            <h3>No favorites yet</h3>
-                            <p>Photos you favorite will appear here.</p>
-                        </div>
+                        <!-- This will be replaced with actual favorites if any exist -->
+                    </div>
+                    <div class="no-content" id="no-favorites-message" style="text-align: center; padding: 3rem 0; color: #888; background: #f9f9f9; border-radius: 8px; margin: 1rem 0;">
+                        <h3>No favorites yet</h3>
+                        <p style="margin: 1rem 0;">Photos you favorite will appear here.</p>
                     </div>
                 </div>
                 
@@ -645,6 +647,20 @@
             }
         }
         
+        // Function to toggle email visibility
+        function toggleEmail() {
+            const emailDisplay = document.getElementById('email-display');
+            const revealButton = document.getElementById('reveal-email-button');
+            
+            if (emailDisplay.style.display === 'none') {
+                emailDisplay.style.display = 'inline';
+                revealButton.textContent = 'Hide';
+            } else {
+                emailDisplay.style.display = 'none';
+                revealButton.textContent = 'Reveal';
+            }
+        }
+        
         // Wait for Clerk to load
         window.addEventListener("load", async () => {
             try {
@@ -689,32 +705,44 @@
                 // Check if user is the owner
                 const isOwner = user.id === "user_321PdlXuM1MAAu1uTGsNHiw8B4X";
                 
-                // Calculate display username
-                const displayUsername = user.username || user.firstName?.toLowerCase() || 'user';
+                // Calculate display username (first and last name are now required by Clerk settings)
+                const displayUsername = user.username || user.firstName.toLowerCase() + (user.lastName ? user.lastName.charAt(0).toLowerCase() : '');
+                
+                // In a production app, you would fetch these counts from your backend
+                const uploadCount = 0;  // Placeholder - would fetch from database
+                const commentCount = 0; // Placeholder - would fetch from database
+                const favoritesReceived = 0; // Placeholder - would fetch from database
+                const favoritesCount = 0; // Placeholder - would fetch from database
                 
                 profileContent.innerHTML = `
                     <div class="profile-overview">
                         <div class="profile-main">
                             <img src="${user.imageUrl || 'assets/images/default-avatar.png'}" alt="Profile" class="profile-picture">
                             <div class="profile-info">
-                                <h2>${user.firstName || ''} ${user.lastName || ''}</h2>
+                                <h2>${user.firstName} ${user.lastName}</h2>
                                 <p class="username">
                                     @${displayUsername}
                                     ${isOwner ? '<span style="background: #444; color: #fff; font-size: 0.75em; padding: 0.2em 0.6em; border-radius: 4px; font-weight: 500; margin-left: 0.3em; vertical-align: middle;">Owner</span>' : ''}
                                 </p>
                                 <div class="profile-details">
                                     <p><strong>Member since:</strong> ${new Date(user.createdAt).toLocaleDateString()}</p>
-                                    <p><strong>Email:</strong> ${user.emailAddresses?.[0]?.emailAddress || 'No email provided'}</p>
-                                    <p><strong>Uploads:</strong> <span id="upload-count">0</span> photos</p>
+                                    <p style="margin-bottom: 5px;"><strong>Email:</strong> 
+                                        <span id="email-display" style="display: none; margin-left: 5px;">${user.emailAddresses?.[0]?.emailAddress || 'No email provided'}</span>
+                                        <button id="reveal-email-button" onclick="toggleEmail()" style="margin-left: 5px; padding: 0.7em 1.4em; background: #f5f5f5; border: 1px solid #eee; border-radius: 6px; font-weight: 500; color: #444; cursor: pointer; transition: all 0.2s ease;">Reveal</button>
+                                    </p>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; margin-bottom: 10px;">
+                                        <p><strong>Uploads:</strong> <span id="upload-count">${uploadCount}</span> photos</p>
+                                        <p><strong>Comments:</strong> <span id="comment-count">${commentCount}</span></p>
+                                        <p><strong>Favorites received:</strong> <span id="favorites-received">${favoritesReceived}</span></p>
+                                        <p><strong>Photos favorited:</strong> <span id="favorites-count">${favoritesCount}</span></p>
+                                    </div>
                                     <p style="margin-top: 10px; color: #777; font-size: 0.9em;">
                                         <strong>Account ID:</strong> 
                                         <span id="account-id-display" style="display: none; margin-left: 5px; padding: 4px 8px; background: #f5f5f5; border-radius: 4px; font-family: monospace;">${user.id}</span>
-                                        <button id="reveal-button" onclick="toggleAccountId()" style="margin-left: 5px; padding: 4px 8px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 0.9em;">Reveal</button>
+                                        <button id="reveal-button" onclick="toggleAccountId()" style="margin-left: 5px; padding: 0.7em 1.4em; background: #f5f5f5; border: 1px solid #eee; border-radius: 6px; font-weight: 500; color: #444; cursor: pointer; transition: all 0.2s ease;">Reveal</button>
                                     </p>
                                 </div>
                                 <div class="user-action-buttons">
-                                    <button onclick="editProfile()">Edit Profile</button>
-                                    <button onclick="window.location.href='upload.html'">Upload Photo</button>
                                     <button onclick="Clerk.openUserProfile()" style="display: flex; align-items: center; gap: 6px; background: #444; color: white;">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-bottom: -1px;">
                                             <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
@@ -722,6 +750,7 @@
                                         </svg>
                                         Settings
                                     </button>
+                                    <button onclick="window.location.href='upload.html'">Upload Photo</button>
                                 </div>
                             </div>
                         </div>
@@ -742,14 +771,8 @@
             }
         }
         
-        // Function to edit profile
-        function editProfile() {
-            Clerk.openUserProfile();
-        }
-        
         // Function to change tabs
         function changeTab(tabName) {
-            
             // Hide all tab contents
             const tabContents = document.querySelectorAll('.tab-content');
             tabContents.forEach(tab => tab.classList.remove('active'));
@@ -764,8 +787,18 @@
             // Highlight the clicked tab
             event.currentTarget.classList.add('active');
             
-            // If this is the comments tab, load comments data
-            if (tabName === 'comments') {
+            // Handle content loading for different tabs
+            if (tabName === 'uploads') {
+                // In a real app, check if there are uploads and show/hide the no-uploads-message accordingly
+                const hasUploads = false; // Placeholder - in production you'd check if user has uploads
+                document.getElementById('no-uploads-message').style.display = hasUploads ? 'none' : 'block';
+            } 
+            else if (tabName === 'favorites') {
+                // In a real app, check if there are favorites and show/hide the no-favorites-message accordingly
+                const hasFavorites = false; // Placeholder - in production you'd check if user has favorites
+                document.getElementById('no-favorites-message').style.display = hasFavorites ? 'none' : 'block';
+            }
+            else if (tabName === 'comments') {
                 // In a real application, you would load comments from an API here
                 console.log('Loading comments data...');
                 // loadUserComments(); // Function to implement in the future
