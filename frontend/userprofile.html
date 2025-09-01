@@ -711,6 +711,9 @@
                     <input type="text" id="lastName" value="${currentLastName}" style="width: 100%; padding: 0.7em; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; box-sizing: border-box;">
                 </div>
                 
+                <!-- Status message area - initially hidden -->
+                <div id="status-message" style="margin-bottom: 1rem; padding: 0.75rem; border-radius: 4px; display: none;"></div>
+                
                 <div style="display: flex; justify-content: space-between; gap: 1rem;">
                     <button id="cancel-btn" style="padding: 0.7em 1.4em; background: #f5f5f5; border: 1px solid #eee; border-radius: 6px; font-weight: 500; color: #444; cursor: pointer; flex: 1;">Cancel</button>
                     <button id="save-btn" style="padding: 0.7em 1.4em; background: #444; color: white; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; flex: 1;">Save Changes</button>
@@ -729,12 +732,39 @@
                 document.body.removeChild(modalOverlay);
             });
             
+            // Add input validation to first and last name fields
+            const firstNameInput = document.getElementById('firstName');
+            const lastNameInput = document.getElementById('lastName');
+            
+            const validateNameField = (input) => {
+                const value = input.value.trim();
+                if (!value) {
+                    input.style.borderColor = '#f44336';
+                    return false;
+                } else {
+                    input.style.borderColor = '#ddd';
+                    return true;
+                }
+            };
+            
+            firstNameInput.addEventListener('input', () => validateNameField(firstNameInput));
+            lastNameInput.addEventListener('input', () => validateNameField(lastNameInput));
+            
             document.getElementById('save-btn').addEventListener('click', async () => {
-                const firstName = document.getElementById('firstName').value.trim();
-                const lastName = document.getElementById('lastName').value.trim();
+                const firstName = firstNameInput.value.trim();
+                const lastName = lastNameInput.value.trim();
                 
-                if (!firstName || !lastName) {
-                    alert('Both first name and last name are required');
+                const isFirstNameValid = validateNameField(firstNameInput);
+                const isLastNameValid = validateNameField(lastNameInput);
+                
+                if (!isFirstNameValid || !isLastNameValid) {
+                    // Display validation error
+                    const statusEl = document.getElementById('status-message');
+                    statusEl.style.display = 'block';
+                    statusEl.style.backgroundColor = '#ffebee';
+                    statusEl.style.color = '#d32f2f';
+                    statusEl.style.border = '1px solid #ffcdd2';
+                    statusEl.innerHTML = '<strong>Error:</strong> Both first name and last name are required.';
                     return;
                 }
                 
@@ -744,20 +774,60 @@
                     saveBtn.textContent = 'Saving...';
                     saveBtn.disabled = true;
                     
+                    // Display status message function
+                    const showStatus = (message, isError) => {
+                        const statusEl = document.getElementById('status-message');
+                        statusEl.style.display = 'block';
+                        statusEl.style.backgroundColor = isError ? '#ffebee' : '#e8f5e9';
+                        statusEl.style.color = isError ? '#d32f2f' : '#2e7d32';
+                        statusEl.style.border = `1px solid ${isError ? '#ffcdd2' : '#c8e6c9'}`;
+                        statusEl.innerHTML = message;
+                    };
+                    
                     // Update user through Clerk
-                    await Clerk.user.update({
-                        firstName: firstName,
-                        lastName: lastName
-                    });
-                    
-                    // Close modal
-                    document.body.removeChild(modalOverlay);
-                    
-                    // Reload profile data
-                    loadUserProfile();
+                    try {
+                        // Check that Clerk user is available
+                        if (!Clerk || !Clerk.user) {
+                            throw new Error("User session not available. Please refresh the page and try again.");
+                        }
+                        
+                        // Check that user has needed methods
+                        if (typeof Clerk.user.update !== 'function') {
+                            console.error("Clerk user update method not available", Clerk.user);
+                            throw new Error("User update feature not available. Try using Advanced Settings.");
+                        }
+                        
+                        // Perform the update
+                        await Clerk.user.update({
+                            firstName: firstName,
+                            lastName: lastName
+                        });
+                        
+                        // Show success message
+                        showStatus('<strong>Success!</strong> Your profile has been updated.', false);
+                        
+                        // Wait a moment before closing to show the success message
+                        setTimeout(() => {
+                            document.body.removeChild(modalOverlay);
+                            loadUserProfile();
+                        }, 1000);
+                        
+                    } catch (error) {
+                        console.error('Error updating user profile:', error);
+                        
+                        // Show error in the status area
+                        showStatus(`<strong>Update failed:</strong> ${error.message || 'Please try again or use Advanced Settings.'}`, true);
+                        
+                        // Reset button state
+                        saveBtn.textContent = 'Save Changes';
+                        saveBtn.disabled = false;
+                    }
                 } catch (error) {
-                    console.error('Error updating user profile:', error);
-                    alert('Failed to update profile. Please try again.');
+                    console.error('Unexpected error:', error);
+                    alert('An unexpected error occurred. Please try again.');
+                    
+                    // Reset button state
+                    const saveBtn = document.getElementById('save-btn');
                     saveBtn.textContent = 'Save Changes';
                     saveBtn.disabled = false;
                 }
