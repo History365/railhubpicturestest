@@ -661,246 +661,25 @@
             }
         }
         
-        // Function to edit user profile with Clerk
-        function editUserProfile() {
-            // The openUserProfile doesn't directly support opening to a specific tab/section
-            // So we'll create our own modal for editing the name first
-            
-            // Get current name from Clerk user
-            const user = Clerk.user;
-            const currentFirstName = user.firstName || '';
-            const currentLastName = user.lastName || '';
-            
-            // Create a modal for name editing
-            const modalOverlay = document.createElement('div');
-            modalOverlay.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background-color: rgba(0,0,0,0.5);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 9999;
-                font-family: 'Inter', sans-serif;
-            `;
-            
-            const modalContent = document.createElement('div');
-            modalContent.style.cssText = `
-                background-color: white;
-                padding: 2rem;
-                border-radius: 8px;
-                width: 90%;
-                max-width: 500px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            `;
-            
-            modalContent.innerHTML = `
-                <h2 style="margin-top: 0; margin-bottom: 1rem; color: #333;">Edit Your Profile</h2>
-                <p style="margin-bottom: 1.5rem; color: #666;">Update your name and profile information.</p>
-                
-                <div style="margin-bottom: 1rem;">
-                    <label for="firstName" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #444;">First Name:</label>
-                    <input type="text" id="firstName" value="${currentFirstName}" style="width: 100%; padding: 0.7em; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; box-sizing: border-box;">
-                </div>
-                
-                <div style="margin-bottom: 1.5rem;">
-                    <label for="lastName" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #444;">Last Name:</label>
-                    <input type="text" id="lastName" value="${currentLastName}" style="width: 100%; padding: 0.7em; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; box-sizing: border-box;">
-                </div>
-                
-                <!-- Status message area - initially hidden -->
-                <div id="status-message" style="margin-bottom: 1rem; padding: 0.75rem; border-radius: 4px; display: none;"></div>
-                
-                <div style="display: flex; justify-content: space-between; gap: 1rem;">
-                    <button id="cancel-btn" style="padding: 0.7em 1.4em; background: #f5f5f5; border: 1px solid #eee; border-radius: 6px; font-weight: 500; color: #444; cursor: pointer; flex: 1;">Cancel</button>
-                    <button id="save-btn" style="padding: 0.7em 1.4em; background: #444; color: white; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; flex: 1;">Save Changes</button>
-                </div>
-                
-                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #eee; text-align: center;">
-                    <button id="advanced-btn" style="padding: 0.5em 1em; background: none; border: none; color: #666; text-decoration: underline; cursor: pointer; font-size: 0.9em;">Advanced Settings</button>
-                    <div style="margin-top: 0.8rem; font-size: 0.85rem; color: #666;">
-                        If you're having issues updating your name here, you can 
-                        <a href="https://accounts.clerk.dev/user" target="_blank" style="color: #444; font-weight: 500;">
-                            update your profile directly in the Clerk dashboard
-                        </a>
-                    </div>
-                </div>
-            `;
-            
-            modalOverlay.appendChild(modalContent);
-            document.body.appendChild(modalOverlay);
-            
-            // Set up event listeners
-            document.getElementById('cancel-btn').addEventListener('click', () => {
-                document.body.removeChild(modalOverlay);
-            });
-            
-            // Add input validation to first and last name fields
-            const firstNameInput = document.getElementById('firstName');
-            const lastNameInput = document.getElementById('lastName');
-            
-            const validateNameField = (input) => {
-                const value = input.value.trim();
-                if (!value) {
-                    input.style.borderColor = '#f44336';
-                    return false;
-                } else {
-                    input.style.borderColor = '#ddd';
-                    return true;
-                }
-            };
-            
-            firstNameInput.addEventListener('input', () => validateNameField(firstNameInput));
-            lastNameInput.addEventListener('input', () => validateNameField(lastNameInput));
-            
-            document.getElementById('save-btn').addEventListener('click', async () => {
-                const firstName = firstNameInput.value.trim();
-                const lastName = lastNameInput.value.trim();
-                
-                const isFirstNameValid = validateNameField(firstNameInput);
-                const isLastNameValid = validateNameField(lastNameInput);
-                
-                if (!isFirstNameValid || !isLastNameValid) {
-                    // Display validation error
-                    const statusEl = document.getElementById('status-message');
-                    statusEl.style.display = 'block';
-                    statusEl.style.backgroundColor = '#ffebee';
-                    statusEl.style.color = '#d32f2f';
-                    statusEl.style.border = '1px solid #ffcdd2';
-                    statusEl.innerHTML = '<strong>Error:</strong> Both first name and last name are required.';
-                    return;
-                }
-                
-                try {
-                    // Show loading state
-                    const saveBtn = document.getElementById('save-btn');
-                    saveBtn.textContent = 'Saving...';
-                    saveBtn.disabled = true;
-                    
-                    // Display status message function
-                    const showStatus = (message, isError) => {
-                        const statusEl = document.getElementById('status-message');
-                        statusEl.style.display = 'block';
-                        statusEl.style.backgroundColor = isError ? '#ffebee' : '#e8f5e9';
-                        statusEl.style.color = isError ? '#d32f2f' : '#2e7d32';
-                        statusEl.style.border = `1px solid ${isError ? '#ffcdd2' : '#c8e6c9'}`;
-                        statusEl.innerHTML = message;
-                    };
-                    
-                    // Update user through Clerk
-                    try {
-                        // Check that Clerk user is available
-                        if (!Clerk || !Clerk.user) {
-                            throw new Error("User session not available. Please refresh the page and try again.");
-                        }
-                        
-                        // Check that user has needed methods
-                        if (typeof Clerk.user.update !== 'function') {
-                            console.error("Clerk user update method not available", Clerk.user);
-                            throw new Error("User update feature not available. Try using Advanced Settings.");
-                        }
-                        
-                        // Log the current user object to see available methods and properties
-                        console.log("Current user object:", Clerk.user);
-                        
-                        // Check what version of Clerk we're using
-                        console.log("Clerk version:", Clerk.version);
-                        
-                        // Let's try the update with their documented approach
-                        console.log(`Attempting to update user with: firstName="${firstName}", lastName="${lastName}"`);
-                        
-                        // Try Clerk's documented method based on their API
-                        try {
-                            await Clerk.user.update({
-                                firstName,
-                                lastName
-                            });
-                        } catch (updateError) {
-                            console.error("Update error details:", updateError);
-                            
-                            // If that fails, try alternative parameter formats
-                            if (updateError.message && updateError.message.includes("is not a valid parameter")) {
-                                console.log("Trying alternative parameter format...");
-                                
-                                // Fallback to another naming pattern if needed
-                                await Clerk.user.update({
-                                    "first_name": firstName,
-                                    "last_name": lastName
-                                });
-                            } else {
-                                // Re-throw the error if it's not related to parameter names
-                                throw updateError;
-                            }
-                        }
-                        
-                        // Show success message
-                        showStatus('<strong>Success!</strong> Your profile has been updated.', false);
-                        
-                        // Wait a moment before closing to show the success message
-                        setTimeout(() => {
-                            document.body.removeChild(modalOverlay);
-                            loadUserProfile();
-                        }, 1000);
-                        
-                    } catch (error) {
-                        console.error('Error updating user profile:', error);
-                        
-                        // Show error in the status area
-                        showStatus(`<strong>Update failed:</strong> ${error.message || 'Please try again or use Advanced Settings.'}`, true);
-                        
-                        // Reset button state
-                        saveBtn.textContent = 'Save Changes';
-                        saveBtn.disabled = false;
-                    }
-                } catch (error) {
-                    console.error('Unexpected error:', error);
-                    alert('An unexpected error occurred. Please try again.');
-                    
-                    // Reset button state
-                    const saveBtn = document.getElementById('save-btn');
-                    saveBtn.textContent = 'Save Changes';
-                    saveBtn.disabled = false;
-                }
-            });
-            
-            document.getElementById('advanced-btn').addEventListener('click', () => {
-                document.body.removeChild(modalOverlay);
-                
-                // Open Clerk's full user profile editor
-                Clerk.openUserProfile({
-                    appearance: {
-                        elements: {
-                            rootBox: {
-                                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                                borderRadius: '8px',
-                            },
-                            card: {
-                                border: '1px solid #eee',
-                            }
+        // Function to open Clerk user profile settings
+        function openProfileSettings() {
+            // Open Clerk's built-in user profile editor
+            Clerk.openUserProfile({
+                appearance: {
+                    elements: {
+                        rootBox: {
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                            borderRadius: '8px',
+                        },
+                        card: {
+                            border: '1px solid #eee',
                         }
                     }
-                }).then(() => {
-                    // After the user closes the profile editor, reload the profile data
-                    loadUserProfile();
-                });
+                }
+            }).then(() => {
+                // After the user closes the profile editor, reload the profile data
+                loadUserProfile();
             });
-            
-            // Add direct Clerk dashboard link
-            const clerkDashboardLink = document.createElement('a');
-            clerkDashboardLink.href = 'https://accounts.clerk.dev/user';
-            clerkDashboardLink.target = '_blank';
-            clerkDashboardLink.style.cssText = 'color: #444; text-decoration: underline; cursor: pointer; font-size: 0.9em; display: block; text-align: center; margin-top: 0.5rem;';
-            clerkDashboardLink.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" style="vertical-align: -2px; margin-right: 3px;">
-                <path d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
-                <path d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
-            </svg> Manage Account on Clerk Dashboard`;
-            
-            // Add the link to the modal
-            const advancedBtnParent = document.getElementById('advanced-btn').parentElement;
-            advancedBtnParent.appendChild(clerkDashboardLink);
         }
         
         // Wait for Clerk to load
@@ -1006,25 +785,24 @@
                                     </div>
                                 </div>
                                 <div class="user-action-buttons">
-                                    <button onclick="editUserProfile()" style="display: flex; align-items: center; gap: 6px; background: #444; color: white;" title="Edit your name and profile settings">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-bottom: -1px;">
-                                            <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
-                                            <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
-                                        </svg>
-                                        Edit Name
-                                    </button>
-                                    <button onclick="Clerk.openUserProfile()" style="display: flex; align-items: center; gap: 6px;" title="Access advanced account settings">
+                                    <button onclick="openProfileSettings()" style="display: flex; align-items: center; gap: 6px; background: #444; color: white;" title="Edit your profile settings">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-bottom: -1px;">
                                             <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
                                             <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319z"/>
                                         </svg>
-                                        Settings
+                                        Edit Profile
+                                    </button>
+                                    <button onclick="window.location.href='https://accounts.clerk.dev/user'" target="_blank" style="display: flex; align-items: center; gap: 6px;" title="Access your Clerk account dashboard">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-bottom: -1px;">
+                                            <path d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
+                                            <path d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
+                                        </svg>
+                                        Dashboard
                                     </button>
                                     <button onclick="window.location.href='upload.html'">Upload Photo</button>
                                 </div>
                                 <p style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #eee; font-size: 0.85em; color: #777; font-style: italic;">
-                                    Click the "Edit Name" button above to update your name and profile information. 
-                                    <span style="color: #444; font-weight: 500; cursor: pointer; text-decoration: underline;" onclick="editUserProfile()">Click here to edit your name now</span>
+                                    Click the "Edit Profile" button above to update your name and profile information.
                                 </p>
                             </div>
                         </div>
