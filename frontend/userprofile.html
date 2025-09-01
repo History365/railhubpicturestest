@@ -705,8 +705,14 @@
                 // Check if user is the owner
                 const isOwner = user.id === "user_321PdlXuM1MAAu1uTGsNHiw8B4X";
                 
-                // Calculate display username (first and last name are now required by Clerk settings)
-                const displayUsername = user.username || user.firstName.toLowerCase() + (user.lastName ? user.lastName.charAt(0).toLowerCase() : '');
+                // Ensure first and last name are available (required by Clerk settings)
+                // In case they've just registered but haven't set their name yet
+                const firstName = user.firstName || '';
+                const lastName = user.lastName || '';
+                
+                // Calculate display username
+                const displayUsername = user.username || 
+                    (firstName.toLowerCase() + (lastName ? lastName.charAt(0).toLowerCase() : ''));
                 
                 // In a production app, you would fetch these counts from your backend
                 const uploadCount = 0;  // Placeholder - would fetch from database
@@ -719,28 +725,34 @@
                         <div class="profile-main">
                             <img src="${user.imageUrl || 'assets/images/default-avatar.png'}" alt="Profile" class="profile-picture">
                             <div class="profile-info">
-                                <h2>${user.firstName} ${user.lastName}</h2>
+                                <h2>${firstName} ${lastName}</h2>
                                 <p class="username">
                                     @${displayUsername}
                                     ${isOwner ? '<span style="background: #444; color: #fff; font-size: 0.75em; padding: 0.2em 0.6em; border-radius: 4px; font-weight: 500; margin-left: 0.3em; vertical-align: middle;">Owner</span>' : ''}
                                 </p>
                                 <div class="profile-details">
-                                    <p><strong>Member since:</strong> ${new Date(user.createdAt).toLocaleDateString()}</p>
-                                    <p style="margin-bottom: 5px;"><strong>Email:</strong> 
-                                        <span id="email-display" style="display: none; margin-left: 5px;">${user.emailAddresses?.[0]?.emailAddress || 'No email provided'}</span>
-                                        <button id="reveal-email-button" onclick="toggleEmail()" style="margin-left: 5px; padding: 4px 8px; background: #f5f5f5; border: 1px solid #eee; border-radius: 6px; font-weight: 500; color: #444; cursor: pointer; transition: all 0.2s ease; font-size: 0.85em;">Reveal</button>
-                                    </p>
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; margin-bottom: 10px;">
-                                        <p><strong>Uploads:</strong> <span id="upload-count">${uploadCount}</span> photos</p>
-                                        <p><strong>Comments:</strong> <span id="comment-count">${commentCount}</span></p>
-                                        <p><strong>Favorites received:</strong> <span id="favorites-received">${favoritesReceived}</span></p>
-                                        <p><strong>Photos favorited:</strong> <span id="favorites-count">${favoritesCount}</span></p>
+                                    <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px;">
+                                        <p style="margin: 0; line-height: 1.6;"><strong>Member since:</strong> ${new Date(user.createdAt).toLocaleDateString()}</p>
+                                        
+                                        <div style="display: flex; align-items: center; margin: 0;">
+                                            <p style="margin: 0; line-height: 1.6;"><strong>Email:</strong></p>
+                                            <span id="email-display" style="display: none; margin-left: 8px; font-family: 'Inter', sans-serif;">${user.emailAddresses?.[0]?.emailAddress || 'No email provided'}</span>
+                                            <button id="reveal-email-button" onclick="toggleEmail()" style="margin-left: 8px; padding: 4px 8px; background: #f5f5f5; border: 1px solid #eee; border-radius: 6px; font-weight: 500; color: #444; cursor: pointer; transition: all 0.2s ease; font-size: 0.85em;">Reveal</button>
+                                        </div>
+                                        
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                            <p style="margin: 0; line-height: 1.6;"><strong>Uploads:</strong> <span id="upload-count">${uploadCount}</span> photos</p>
+                                            <p style="margin: 0; line-height: 1.6;"><strong>Comments:</strong> <span id="comment-count">${commentCount}</span></p>
+                                            <p style="margin: 0; line-height: 1.6;"><strong>Favorites received:</strong> <span id="favorites-received">${favoritesReceived}</span></p>
+                                            <p style="margin: 0; line-height: 1.6;"><strong>Photos favorited:</strong> <span id="favorites-count">${favoritesCount}</span></p>
+                                        </div>
+                                        
+                                        <div style="display: flex; align-items: center; margin: 0;">
+                                            <p style="margin: 0; line-height: 1.6;"><strong>Account ID:</strong></p>
+                                            <span id="account-id-display" style="display: none; margin-left: 8px; padding: 2px 6px; background: #f5f5f5; border-radius: 4px; font-family: monospace;">${user.id}</span>
+                                            <button id="reveal-button" onclick="toggleAccountId()" style="margin-left: 8px; padding: 4px 8px; background: #f5f5f5; border: 1px solid #eee; border-radius: 6px; font-weight: 500; color: #444; cursor: pointer; transition: all 0.2s ease; font-size: 0.85em;">Reveal</button>
+                                        </div>
                                     </div>
-                                    <p style="margin-top: 10px; color: #777; font-size: 0.9em;">
-                                        <strong>Account ID:</strong> 
-                                        <span id="account-id-display" style="display: none; margin-left: 5px; padding: 4px 8px; background: #f5f5f5; border-radius: 4px; font-family: monospace;">${user.id}</span>
-                                        <button id="reveal-button" onclick="toggleAccountId()" style="margin-left: 5px; padding: 4px 8px; background: #f5f5f5; border: 1px solid #eee; border-radius: 6px; font-weight: 500; color: #444; cursor: pointer; transition: all 0.2s ease; font-size: 0.85em;">Reveal</button>
-                                    </p>
                                 </div>
                                 <div class="user-action-buttons">
                                     <button onclick="Clerk.openUserProfile()" style="display: flex; align-items: center; gap: 6px; background: #444; color: white;" title="Update your name, profile picture and other account settings">
@@ -752,7 +764,7 @@
                                     </button>
                                     <button onclick="window.location.href='upload.html'">Upload Photo</button>
                                 </div>
-                                <p style="margin-top: 10px; font-size: 0.85em; color: #777; font-style: italic;">To update your name and profile picture, click the Settings button above</p>
+                                <p style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #eee; font-size: 0.85em; color: #777; font-style: italic;">To update your name and profile picture, click the Settings button above</p>
                             </div>
                         </div>
                     </div>
