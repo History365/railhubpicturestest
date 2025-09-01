@@ -721,6 +721,12 @@
                 
                 <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #eee; text-align: center;">
                     <button id="advanced-btn" style="padding: 0.5em 1em; background: none; border: none; color: #666; text-decoration: underline; cursor: pointer; font-size: 0.9em;">Advanced Settings</button>
+                    <div style="margin-top: 0.8rem; font-size: 0.85rem; color: #666;">
+                        If you're having issues updating your name here, you can 
+                        <a href="https://accounts.clerk.dev/user" target="_blank" style="color: #444; font-weight: 500;">
+                            update your profile directly in the Clerk dashboard
+                        </a>
+                    </div>
                 </div>
             `;
             
@@ -797,11 +803,38 @@
                             throw new Error("User update feature not available. Try using Advanced Settings.");
                         }
                         
-                        // Perform the update
-                        await Clerk.user.update({
-                            firstName: firstName,
-                            lastName: lastName
-                        });
+                        // Log the current user object to see available methods and properties
+                        console.log("Current user object:", Clerk.user);
+                        
+                        // Check what version of Clerk we're using
+                        console.log("Clerk version:", Clerk.version);
+                        
+                        // Let's try the update with their documented approach
+                        console.log(`Attempting to update user with: firstName="${firstName}", lastName="${lastName}"`);
+                        
+                        // Try Clerk's documented method based on their API
+                        try {
+                            await Clerk.user.update({
+                                firstName,
+                                lastName
+                            });
+                        } catch (updateError) {
+                            console.error("Update error details:", updateError);
+                            
+                            // If that fails, try alternative parameter formats
+                            if (updateError.message && updateError.message.includes("is not a valid parameter")) {
+                                console.log("Trying alternative parameter format...");
+                                
+                                // Fallback to another naming pattern if needed
+                                await Clerk.user.update({
+                                    "first_name": firstName,
+                                    "last_name": lastName
+                                });
+                            } else {
+                                // Re-throw the error if it's not related to parameter names
+                                throw updateError;
+                            }
+                        }
                         
                         // Show success message
                         showStatus('<strong>Success!</strong> Your profile has been updated.', false);
@@ -854,6 +887,20 @@
                     loadUserProfile();
                 });
             });
+            
+            // Add direct Clerk dashboard link
+            const clerkDashboardLink = document.createElement('a');
+            clerkDashboardLink.href = 'https://accounts.clerk.dev/user';
+            clerkDashboardLink.target = '_blank';
+            clerkDashboardLink.style.cssText = 'color: #444; text-decoration: underline; cursor: pointer; font-size: 0.9em; display: block; text-align: center; margin-top: 0.5rem;';
+            clerkDashboardLink.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" style="vertical-align: -2px; margin-right: 3px;">
+                <path d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
+                <path d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
+            </svg> Manage Account on Clerk Dashboard`;
+            
+            // Add the link to the modal
+            const advancedBtnParent = document.getElementById('advanced-btn').parentElement;
+            advancedBtnParent.appendChild(clerkDashboardLink);
         }
         
         // Wait for Clerk to load
